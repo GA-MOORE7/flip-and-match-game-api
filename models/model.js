@@ -5,8 +5,8 @@ const itemSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  image: {
-    type: String, // base64 string
+  imageUrl: {
+    type: String, // Cloudinary URL instead of base64
     required: true
   },
   timestamp: {
@@ -36,6 +36,6 @@ const puzzleSchema = new mongoose.Schema({
   }
 });
 
-// ✅ Correctly export the model
 module.exports = mongoose.model('FlipMatchPuzzle', puzzleSchema);
+
 
