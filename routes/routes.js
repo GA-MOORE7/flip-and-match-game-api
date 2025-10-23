@@ -1,12 +1,8 @@
 const express = require('express');
-const multer = require('multer');
 const { v2: cloudinary } = require('cloudinary');
 const Puzzle = require('../models/model');
 
 const router = express.Router();
-
-// Multer setup — temporary local storage
-const upload = multer({ dest: 'uploads/' });
 
 // Cloudinary config
 cloudinary.config({
@@ -17,39 +13,32 @@ cloudinary.config({
 
 // --------------------------
 // POST /api/puzzles
-// Create a new puzzle with image uploads
+// Create a new puzzle from base64 images
 // --------------------------
-router.post('/puzzles', upload.array('images'), async (req, res) => {
+router.post('/puzzles', async (req, res) => {
   try {
-    const { name, words } = req.body;
-    const files = req.files;
+    const { name, items } = req.body; // items = [{ word, image (base64), timestamp }, ...]
 
-    if (!name || !words || !Array.isArray(files) || files.length === 0) {
-      return res.status(400).json({ error: 'Name, words, and images are required.' });
+    if (!name || !items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'Name and items are required.' });
     }
 
-    const parsedWords = Array.isArray(words) ? words : JSON.parse(words);
-
-    if (parsedWords.length !== files.length) {
-      return res.status(400).json({ error: 'Each word must have a corresponding image.' });
-    }
-
-    // Upload each image to Cloudinary and build the items array
-    const items = [];
-    for (let i = 0; i < files.length; i++) {
-      const result = await cloudinary.uploader.upload(files[i].path, {
+    // Upload each base64 image to Cloudinary
+    const uploadedItems = [];
+    for (let item of items) {
+      const result = await cloudinary.uploader.upload(item.image, {
         folder: `flip-match/${name}`,
       });
 
-      items.push({
-        word: parsedWords[i],
+      uploadedItems.push({
+        word: item.word,
         imageUrl: result.secure_url,
-        timestamp: Date.now(),
+        timestamp: item.timestamp,
       });
     }
 
     // Save the puzzle in MongoDB
-    const puzzle = new Puzzle({ name, items });
+    const puzzle = new Puzzle({ name, items: uploadedItems });
     const savedPuzzle = await puzzle.save();
 
     res.status(201).json({
@@ -76,5 +65,6 @@ router.get('/puzzles', async (req, res) => {
 });
 
 module.exports = router;
+
 
 
