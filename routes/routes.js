@@ -64,7 +64,28 @@ router.get('/puzzles', async (req, res) => {
   }
 });
 
+// --------------------------
+// GET /api/puzzles/:id
+// Retrieve a specific puzzle by ID
+// --------------------------
+router.get('/puzzles/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const puzzle = await Puzzle.findById(id);
+
+    if (!puzzle) {
+      return res.status(404).json({ error: 'Puzzle not found.' });
+    }
+
+    res.status(200).json(puzzle);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to retrieve puzzle.' });
+  }
+});
+
 module.exports = router;
+
 
 
 
