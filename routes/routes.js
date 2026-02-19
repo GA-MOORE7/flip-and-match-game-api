@@ -84,6 +84,39 @@ router.get('/puzzles/:id', async (req, res) => {
   }
 });
 
+// --------------------------
+// DELETE /api/puzzles/:id
+// Delete puzzle + Cloudinary assets
+// --------------------------
+router.delete('/puzzles/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const puzzle = await Puzzle.findById(id);
+
+    if (!puzzle) {
+      return res.status(404).json({ error: 'Puzzle not found.' });
+    }
+
+    // Delete all images in the puzzle folder
+    const folderPath = `flip-match/${puzzle.name}`;
+
+    await cloudinary.api.delete_resources_by_prefix(folderPath);
+    await cloudinary.api.delete_folder(folderPath);
+
+    // Delete puzzle from MongoDB
+    await Puzzle.findByIdAndDelete(id);
+
+    res.status(200).json({
+      message: 'Puzzle and images deleted successfully.',
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 module.exports = router;
 
 
