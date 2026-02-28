@@ -28,9 +28,10 @@ mongoose
   .then(() => console.log("Database Connected"))
   .catch((error) => console.log("MongoDB connection error:", error));
 
-// Start server
-app.listen(3000, () =>
-  console.log("Server started on http://localhost:3000")
+// Start server using Heroku's port, fallback to 3000 locally
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () =>
+  console.log(`Server started on port ${PORT}`)
 );
 
 
