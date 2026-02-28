@@ -19,6 +19,13 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 // ✅ Serve public folder using absolute path
 app.use(express.static(path.join(__dirname, "public")));
 
+// --------------------------
+// ROOT route
+// --------------------------
+app.get("/", (req, res) => {
+  res.send("Welcome to the Flip and Match API! Try /api/puzzles to see puzzles.");
+});
+
 // API routes
 app.use("/api", routes);
 
@@ -28,10 +35,9 @@ mongoose
   .then(() => console.log("Database Connected"))
   .catch((error) => console.log("MongoDB connection error:", error));
 
-// Start server using Heroku's port, fallback to 3000 locally
+// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
-  console.log(`Server started on port ${PORT}`)
+  console.log(`Server started on http://localhost:${PORT}`)
 );
-
 
